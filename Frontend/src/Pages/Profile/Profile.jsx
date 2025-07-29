@@ -1,26 +1,58 @@
-import React, { useState } from 'react';
-import { User, Shield, Settings, Edit2 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { User, Edit2 } from 'lucide-react';
+import { useDispatch, useSelector } from 'react-redux'
+import { updateUserProfile } from '../../features/user/userSlice';
+import { toast } from 'react-toastify'
+import { useImageUpload } from '../../Hooks/useImageUpload';
+import user_icon from '../../assets/avatar.png';
+import { useNavigate } from 'react-router-dom';
 
 const UserProfile = () => {
-    const [formData, setFormData] = useState({ fullname: '', email: '', phone: '', username: '', bio: '' });
+    const currentUser = useSelector((state) => state.user.user);
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
 
-    const [previewImage, setPreviewImage] = useState('/api/placeholder/120/120');
-    const [isSuccess, setIsSuccess] = useState(false);
-    const [activeTab, setActiveTab] = useState('Profile');
+    const [formData, setFormData] = useState({ name: '', email: '', phone: '', username: '', bio: '', profilePic: '' });
+    const [errors, setErrors] = useState({});
+
+
+    useEffect(() => {
+        if (currentUser) {
+            setFormData({
+                name: currentUser.name || '',
+                email: currentUser.email || '',
+                phone: currentUser.phone || '',
+                username: currentUser.username || '',
+                bio: currentUser.bio || ''
+            });
+            setPreviewImage(currentUser.profilePic || user_icon);
+        }
+    }, [currentUser]);
+
+    const [previewImage, setPreviewImage] = useState(user_icon);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleImageChange = (e) => {
+    const { uploadImage } = useImageUpload();
+
+    const handleImageChange = async (e) => {
         const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setPreviewImage(reader.result);
-            };
-            reader.readAsDataURL(file);
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setPreviewImage(reader.result);
+        };
+        reader.readAsDataURL(file);
+
+        try {
+            const url = await uploadImage(file);
+            setFormData(prev => ({ ...prev, profilePic: url }));
+        } catch (err) {
+            toast.error('Upload failed');
         }
     };
 
@@ -28,17 +60,46 @@ const UserProfile = () => {
         document.getElementById('image-upload').click();
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        const newErrors = {};
 
-        console.log('Updated Profile:', formData);
+        if (!formData.name) newErrors.name = 'Name is required';
+
+        if (!formData.email) {
+            newErrors.email = 'Email is required';
+        } else {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(formData.email)) {
+                newErrors.email = 'Enter a valid email address';
+            }
+        }
+
+        if(currentUser.username){
+            newErrors.username = 'username is required';
+        } else if (formData.username && formData.username.trim() === '') {
+            newErrors.username = 'Username cannot be just spaces';
+        }
+
+        const phoneRegex = /^[0-9]{10}$/;
+        if (formData.phone && !phoneRegex.test(formData.phone)) {
+            newErrors.phone = 'Phone must be 10 digits';
+        }
+
+        setErrors(newErrors);
+        if (Object.keys(newErrors).length > 0) return;
+
+        try {
+            const resultAction = await dispatch(updateUserProfile(formData));
+            if (updateUserProfile.fulfilled.match(resultAction)) {
+                toast.success('Profile updated successfully!');
+            } else {
+                throw resultAction.error;
+            }
+        } catch (err) {
+            toast.error(err.message || 'Failed to update profile');
+        }
     };
-
-    const sidebarItems = [
-        { name: 'Profile', icon: User, active: true },
-        { name: 'Privacy', icon: Shield, active: false },
-        { name: 'Settings', icon: Settings, active: false }
-    ];
 
     return (
         <div className="min-h-screen bg-neutral-900 text-neutral-100 flex">
@@ -47,22 +108,14 @@ const UserProfile = () => {
                     <span className="text-purple-400">GenZ</span> Account
                 </h2>
                 <nav className="space-y-2">
-                    {sidebarItems.map((item) => {
-                        const IconComponent = item.icon;
-                        return (
-                            <button
-                                key={item.name}
-                                onClick={() => setActiveTab(item.name)}
-                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-md text-left transition-all duration-200 ${activeTab === item.name
-                                        ? 'bg-purple-700/30 text-white border border-purple-500/50'
-                                        : 'text-neutral-300 hover:bg-neutral-700 hover:text-neutral-100'
-                                    }`}
-                            >
-                                <IconComponent size={18} className={activeTab === item.name ? "text-purple-400" : "text-neutral-400"} />
-                                <span className="font-medium">{item.name}</span>
-                            </button>
-                        );
-                    })}
+                    <button
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-md text-left transition-all duration-200
+                                'text-neutral-300 bg-purple-900/50 hover:bg-neutral-700 hover:text-neutral-100'
+                            }`}
+                    >
+                        <User size={18} className='text-purple-400' />
+                        <span className="font-medium">Profile</span>
+                    </button>
                 </nav>
             </div>
 
@@ -97,9 +150,9 @@ const UserProfile = () => {
                                 </div>
                                 <div>
                                     <h2 className="text-xl font-semibold text-white">
-                                        {formData.fullname || 'GenZ User'}
+                                        {formData.name || currentUser?.name || 'genZ User'}
                                     </h2>
-                                    <p className="text-purple-400">@{formData.username || 'user07_'}</p>
+                                    <p className="text-purple-400">@{currentUser?.username || 'no_username' }</p>
                                 </div>
                             </div>
                         </div>
@@ -113,12 +166,13 @@ const UserProfile = () => {
                                         </label>
                                         <input
                                             type="text"
-                                            name="fullname"
-                                            value={formData.fullname}
+                                            name="name"
+                                            value={formData.name}
                                             onChange={handleChange}
                                             className="w-full px-4 py-2 bg-neutral-700 border border-neutral-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-white placeholder-neutral-400 transition-all duration-200"
                                             placeholder="Your full name"
                                         />
+                                        {errors.name && <p className="text-red-500 text-[12px] mt-1">{errors.name}</p>}
                                     </div>
 
                                     <div>
@@ -133,6 +187,7 @@ const UserProfile = () => {
                                             className="w-full px-4 py-2 bg-neutral-700 border border-neutral-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-white placeholder-neutral-400 transition-all duration-200"
                                             placeholder="Your username"
                                         />
+                                        {errors.username && <p className="text-red-500 text-[12px] mt-1">{errors.username}</p>}
                                     </div>
 
                                     <div>
@@ -147,6 +202,7 @@ const UserProfile = () => {
                                             className="w-full px-4 py-2 bg-neutral-700 border border-neutral-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-white placeholder-neutral-400 transition-all duration-200"
                                             placeholder="user@gmail.com"
                                         />
+                                        {errors.email && <p className="text-red-500 text-[12px] mt-1">{errors.email}</p>}
                                     </div>
 
                                     <div>
@@ -161,6 +217,7 @@ const UserProfile = () => {
                                             className="w-full px-4 py-2 bg-neutral-700 border border-neutral-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-white placeholder-neutral-400 transition-all duration-200"
                                             placeholder="+91 7345678900"
                                         />
+                                        {errors.phone && <p className="text-red-500 text-[12px] mt-1">{errors.phone}</p>}
                                     </div>
 
                                     <div className="md:col-span-2">
@@ -182,6 +239,7 @@ const UserProfile = () => {
                                     <button
                                         type="button"
                                         className="px-6 py-2 text-neutral-300 bg-neutral-700 font-medium rounded-lg hover:bg-neutral-600 hover:text-neutral-200 transition-all duration-200 mr-4 border border-neutral-600"
+                                        onClick={() => navigate('/')}
                                     >
                                         Cancel
                                     </button>

@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import ProfileDropdown from '../../components/ui/ProfileDropdown';
 import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
+import user_icon from '../../assets/avatar.png'
 
 const Navbar = () => {
     const [showDropdown, setShowDropdown] = useState(false);
@@ -18,7 +19,7 @@ const Navbar = () => {
                 <i className="fa-regular fa-bell text-white text-xl"></i>
                 {user ? (
                     <div onClick={() => setShowDropdown(!showDropdown)} className='relative cursor-pointer'>
-                        <i className="fa-solid fa-user text-white text-xl"></i>
+                        <img src={user.profilePic || user_icon} alt="" className='h-8 w-8' />
                         {showDropdown && <ProfileDropdown />}
                     </div>
                 ) : (

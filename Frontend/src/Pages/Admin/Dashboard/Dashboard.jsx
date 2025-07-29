@@ -31,7 +31,6 @@ const Dashboard = () => {
     return (
         <div className="min-h-screen bg-neutral-900 text-neutral-100 p-6">
             <div className="max-w-7xl mx-auto pt-16">
-                {/* Header */}
                 <div className="flex justify-between items-center mb-8">
                     <h1 className="text-2xl font-bold">
                         <span className="text-purple-400">GenZ</span> Dashboard
@@ -41,7 +40,6 @@ const Dashboard = () => {
                     </button>
                 </div>
 
-                {/* Table */}
                 <div className="bg-neutral-800 rounded-xl border border-neutral-700 overflow-hidden shadow-lg mb-6">
                     <div className="overflow-x-auto">
                         <table className="w-full">
@@ -60,8 +58,8 @@ const Dashboard = () => {
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
                                                 <div className="flex-shrink-0 h-10 w-10">
-                                                    {user.avatar ? (
-                                                        <img className="h-10 w-10 rounded-full border border-purple-500/30" src={user.avatar} alt="" />
+                                                    {user.profilePic ? (
+                                                        <img className="h-10 w-10 rounded-full border border-purple-500/30" src={user.profilePic} alt="" />
                                                     ) : (
                                                         <div className="h-10 w-10 rounded-full bg-purple-900/50 border border-purple-500/30 flex items-center justify-center">
                                                             <User className="h-5 w-5 text-purple-400" />
@@ -77,7 +75,7 @@ const Dashboard = () => {
                                             <div className="text-sm text-neutral-300">{user.email}</div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm text-neutral-300">{user.phone}</div>
+                                            <div className="text-sm text-neutral-300">{user.phone || 'N/A'}</div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <div className="flex justify-end space-x-2">
@@ -104,7 +102,6 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                {/* Pagination - Styled for Dark Theme */}
                 <div className="flex items-center justify-between">
                     <div className="text-sm text-neutral-400">
                         Page <span className="font-medium">{currentPage}</span> of{' '}

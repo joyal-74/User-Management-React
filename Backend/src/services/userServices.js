@@ -14,8 +14,9 @@ export const registerUser = async (userData, userRepo) => {
         name,
         email,
         password: hashedPassword,
-        phone : phone || 'N/A',
-        profileImg : imageUrl || ''
+        username : '',
+        phone: phone || 'N/A',
+        profilePic: profilePic || ''
     });
 
     return {
@@ -24,6 +25,7 @@ export const registerUser = async (userData, userRepo) => {
             id: user._id,
             name: user.name,
             email: user.email,
+            profilePic : user.profilePic
         }
     };
 };
@@ -64,3 +66,20 @@ export const getUserProfile = async (userId, userRepo) => {
         email: user.email,
     };
 };
+
+export const updateCurrentUser = async (id, data, userRepo) => {
+    const user = await userRepo.findById(id);
+
+    if (!user) throw new Error('User not found');
+
+    user.name = data.name || user.name;
+    user.email = data.email || user.email;
+    user.username = data.username || user.username;
+    user.phone = data.phone || user.phone;
+    user.bio = data.bio || user.bio;
+    user.profilePic = data.profilePic || user.profilePic;
+
+
+    const updatedUser = await user.save();
+    return updatedUser;
+}

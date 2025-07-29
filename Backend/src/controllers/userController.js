@@ -1,5 +1,5 @@
 import { MongoUserRepository } from "../repositories/User/MongouserRepository.js";
-import { registerUser, loginUser, getUserProfile, logoutUserService } from "../services/userServices.js";
+import { registerUser, loginUser, getUserProfile, logoutUserService, updateCurrentUser} from "../services/userServices.js";
 import { generateToken } from '../utils/token.js';
 
 
@@ -37,7 +37,7 @@ export const loginUserHandler = async (req, res) => {
             maxAge: 7 * 24 * 60 * 60 * 1000
         });
 
-        res.status(200).json({...response, token});
+        res.status(200).json({ ...response, token });
     } catch (error) {
         res.status(401).json({ error: error.message });
     }
@@ -77,4 +77,15 @@ export const getCurrentUser = (req, res) => {
     res.status(200).json({
         user: req.user,
     });
+};
+
+
+export const updateCurrentUserHandler = async (req, res) => {
+    try {
+        const updatedUser = await updateCurrentUser(req.user._id, req.body, userRepo);
+        res.status(200).json({ user: updatedUser });
+    } catch (error) {
+        console.error(error);
+        res.status(404).json({ error: error.message });
+    }
 };
