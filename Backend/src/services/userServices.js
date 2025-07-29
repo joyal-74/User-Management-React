@@ -1,9 +1,8 @@
-import User from '../models/userSchema.js';
 import bcrypt from 'bcryptjs';
 
 
 export const registerUser = async (userData, userRepo) => {
-    const { name, email, password } = userData;
+    const { name, email, phone, password, profilePic } = userData;
 
     const userExists = await userRepo.findByEmail(email);
     if (userExists) throw new Error('User already exists');
@@ -78,7 +77,6 @@ export const updateCurrentUser = async (id, data, userRepo) => {
     user.phone = data.phone || user.phone;
     user.bio = data.bio || user.bio;
     user.profilePic = data.profilePic || user.profilePic;
-
 
     const updatedUser = await user.save();
     return updatedUser;

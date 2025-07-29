@@ -59,20 +59,21 @@ export const deleteUser = createAsyncThunk(
     'user/deleteuser',
     async (userId, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.delete('/users/delete', updatedData);
-            
+            const response = await axiosInstance.delete(`/admin/delete/${userId}`);
             return response.data;
         } catch (err) {
-            const errorData = err.response?.data?.error || err.message || 'Failed to update profile';
+            const errorData = err.response?.data?.error || err.message || 'Failed to delete profile';
             return rejectWithValue(errorData);
         }
     }
 );
+
+
 export const editUser = createAsyncThunk(
     'user/edituser',
-    async (userId, { rejectWithValue }) => {
+    async ({ userId, updatedData }, { rejectWithValue }) => {
         try {
-            const response = await axiosInstance.put('/users/edit', updatedData);
+            const response = await axiosInstance.put('/admin/edit', updatedData);
             return response.data;
         } catch (err) {
             const errorData = err.response?.data?.error || err.message || 'Failed to update profile';

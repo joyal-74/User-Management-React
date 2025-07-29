@@ -2,7 +2,6 @@ import { MongoUserRepository } from "../repositories/User/MongouserRepository.js
 import { registerUser, loginUser, getUserProfile, logoutUserService, updateCurrentUser} from "../services/userServices.js";
 import { generateToken } from '../utils/token.js';
 
-
 const userRepo = new MongoUserRepository();
 
 export const registerUserHandler = async (req, res) => {

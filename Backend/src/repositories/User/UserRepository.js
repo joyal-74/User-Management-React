@@ -11,6 +11,10 @@ export class UserRepository {
         throw new Error('Method not implemented');
     }
 
+    async findByIdAndDelete(id) {
+        throw new Error('Method not implemented');
+    }
+
     async findAll(id) {
         throw new Error('Method not implemented');
     }

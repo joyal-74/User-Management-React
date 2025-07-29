@@ -28,4 +28,8 @@ export class MongoUserRepository extends UserRepository {
             pages: Math.ceil(total / limit)
         };
     }
+
+    async findByIdAndDelete(id) {
+        return await User.findByIdAndDelete(id);
+    }
 }

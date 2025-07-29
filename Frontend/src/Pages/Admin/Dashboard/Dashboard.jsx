@@ -1,9 +1,10 @@
 import { Edit, Trash2, User, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { deleteUser, fetchAllUsers } from '../../../features/admin/adminSlice';
+import { deleteUser, editUser, fetchAllUsers } from '../../../features/admin/adminSlice';
 import EditUserModal from '../Modals/EditUserModal';
 import DeleteWarningModal from '../Modals/DeleteWarningModal';
+import {toast} from 'react-toastify'
 
 const Dashboard = () => {
     const { users, totalPages } = useSelector((state) => state.admin);
@@ -42,12 +43,13 @@ const Dashboard = () => {
 
     const handleConfirmDelete = () => {
         dispatch(deleteUser(selectedUser._id));
+        toast.success('User deleted successfully..!')
         setIsDeleteModalOpen(false);
     };
 
     return (
         <div className="min-h-screen bg-neutral-900 text-neutral-100 p-6">
-            <div className="max-w-7xl mx-auto pt-16 relative">
+            <div className="max-w-7xl mx-auto pt-16">
                 <div className="flex justify-between items-center mb-8">
                     <h1 className="text-2xl font-bold">
                         <span className="text-purple-400">GenZ</span> Dashboard
@@ -108,7 +110,7 @@ const Dashboard = () => {
                                                     <Edit className="h-5 w-5" />
                                                 </button>
                                                 <button
-                                                    onClick={() => handleDelete(user._id)}
+                                                    onClick={() => handleDelete(user)}
                                                     className="text-red-400 hover:text-red-300 p-1 rounded-full hover:bg-red-900/30 transition-colors duration-200"
                                                     title="Delete"
                                                 >

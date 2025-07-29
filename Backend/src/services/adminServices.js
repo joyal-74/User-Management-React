@@ -1,12 +1,7 @@
-import Admin from '../models/adminSchema.js';
 import bcrypt from 'bcryptjs';
-import { MongoUserRepository } from '../repositories/User/MongouserRepository.js';
-import { MongoAdminRepository } from '../repositories/Admin/MongoAdminRepository.js';
 
-const userRepo = new MongoUserRepository();
-const adminRepo = new MongoAdminRepository();
 
-export const loginAdmin = async ({ email, password }) => {
+export const loginAdmin = async ({ email, password }, adminRepo) => {
     const admin = await adminRepo.findByEmail({ email });
     if (!admin) throw new Error('Invalid credentials');
 
@@ -40,16 +35,35 @@ export const getAdminProfile = async (adminId) => {
     };
 };
 
-
-export const findAllUsers = async (req, res) => {
-    try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
-        const data = await userRepo.findAll(page, limit);
-
-        res.status(200).json(data);
-    } catch (error) {
-        console.error('Failed to fetch users:', error.message);
-        res.status(500).json({ error: 'Failed to fetch users' });
-    }
+export const findAllUsers = async (page, limit, userRepo) => {
+    const data = await userRepo.findAll(page, limit);
+    return data;
 };
+
+export const editUserDetails = async (data, userRepo) => {
+    const user = await userRepo.findByEmail(data.email);
+    if (!user) throw new Error('User not found');
+
+    user.name = data.name || user.name;
+    user.email = data.email || user.email;
+    user.username = data.username || user.username;
+    user.phone = data.phone || user.phone;
+    user.bio = data.bio || user.bio;
+    user.profilePic = data.profilePic || user.profilePic;
+
+    await user.save();
+    const newUsers = await userRepo.findAll();
+
+    return newUsers;
+};
+
+
+export const deleteUser = async (id, userRepo) => {
+    const user = await userRepo.findByIdAndDelete(id);
+
+    if(!user) throw new Error('User not found');
+
+    const newUsers = await userRepo.findAll();
+
+    return newUsers;
+}
