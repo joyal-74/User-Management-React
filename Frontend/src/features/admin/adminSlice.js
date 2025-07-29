@@ -30,15 +30,15 @@ export const fetchCurrentAdmin = createAsyncThunk(
 
 
 export const fetchAllUsers = createAsyncThunk(
-  'admin/users',
-  async ({ page = 1, limit = 6 } = {}, { rejectWithValue }) => {
-    try {
-      const response = await axiosInstance.get(`/admin/users?page=${page}&limit=${limit}`);
-      return response.data;
-    } catch (error) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to fetch users');
+    'admin/users',
+    async ({ page = 1, limit = 6 } = {}, { rejectWithValue }) => {
+        try {
+            const response = await axiosInstance.get(`/admin/users?page=${page}&limit=${limit}`);
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.error || 'Failed to fetch users');
+        }
     }
-  }
 );
 
 
@@ -55,13 +55,39 @@ export const logoutAdmin = createAsyncThunk(
     }
 );
 
+export const deleteUser = createAsyncThunk(
+    'user/deleteuser',
+    async (userId, { rejectWithValue }) => {
+        try {
+            const response = await axiosInstance.delete('/users/delete', updatedData);
+            
+            return response.data;
+        } catch (err) {
+            const errorData = err.response?.data?.error || err.message || 'Failed to update profile';
+            return rejectWithValue(errorData);
+        }
+    }
+);
+export const editUser = createAsyncThunk(
+    'user/edituser',
+    async (userId, { rejectWithValue }) => {
+        try {
+            const response = await axiosInstance.put('/users/edit', updatedData);
+            return response.data;
+        } catch (err) {
+            const errorData = err.response?.data?.error || err.message || 'Failed to update profile';
+            return rejectWithValue(errorData);
+        }
+    }
+);
+
 
 const adminSlice = createSlice({
     name: 'admin',
     initialState: {
         admin: null,
-        users : [],
-        totalPages : null,
+        users: [],
+        totalPages: null,
         loading: false,
     },
     reducers: {
@@ -88,7 +114,7 @@ const adminSlice = createSlice({
             })
             .addCase(fetchCurrentAdmin.fulfilled, (state, action) => {
                 state.loading = false;
-                state.admin = action.payload?.admin || null; 
+                state.admin = action.payload?.admin || null;
             })
             .addCase(fetchCurrentAdmin.rejected, (state) => {
                 state.loading = false;
@@ -99,10 +125,32 @@ const adminSlice = createSlice({
             })
             .addCase(fetchAllUsers.fulfilled, (state, action) => {
                 state.loading = false;
-                state.users = action.payload?.users || null; 
+                state.users = action.payload?.users || null;
                 state.totalPages = action.payload.pages;
             })
             .addCase(fetchAllUsers.rejected, (state) => {
+                state.loading = false;
+            })
+            //edit user
+            .addCase(editUser.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(editUser.fulfilled, (state, action) => {
+                state.loading = false;
+                state.users = action.payload?.users || null;
+            })
+            .addCase(editUser.rejected, (state) => {
+                state.loading = false;
+            })
+            // delete user
+            .addCase(deleteUser.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(deleteUser.fulfilled, (state, action) => {
+                state.loading = false;
+                state.users = action.payload?.users || null;
+            })
+            .addCase(deleteUser.rejected, (state) => {
                 state.loading = false;
             })
 

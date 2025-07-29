@@ -1,14 +1,19 @@
 import { Edit, Trash2, User, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchAllUsers } from '../../../features/admin/adminSlice';
-import { useState } from 'react';
+import { deleteUser, fetchAllUsers } from '../../../features/admin/adminSlice';
+import EditUserModal from '../Modals/EditUserModal';
+import DeleteWarningModal from '../Modals/DeleteWarningModal';
 
 const Dashboard = () => {
     const { users, totalPages } = useSelector((state) => state.admin);
     const dispatch = useDispatch();
     const [currentPage, setCurrentPage] = useState(1);
     const limit = 6;
+
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [selectedUser, setSelectedUser] = useState(null);
 
     useEffect(() => {
         dispatch(fetchAllUsers({ page: currentPage, limit }));
@@ -20,17 +25,29 @@ const Dashboard = () => {
         }
     };
 
-    const handleEdit = (userId) => {
-        console.log('Edit user:', userId);
+    const handleEdit = (user) => {
+        setSelectedUser(user);
+        setIsEditModalOpen(true);
     };
 
-    const handleDelete = (userId) => {
-        console.log('Delete user:', userId);
+    const handleSaveEdit = (userId, updatedData) => {
+        dispatch(editUser({ userId, updatedData }));
+        setIsEditModalOpen(false);
+    };
+
+    const handleDelete = (user) => {
+        setSelectedUser(user);
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleConfirmDelete = () => {
+        dispatch(deleteUser(selectedUser._id));
+        setIsDeleteModalOpen(false);
     };
 
     return (
         <div className="min-h-screen bg-neutral-900 text-neutral-100 p-6">
-            <div className="max-w-7xl mx-auto pt-16">
+            <div className="max-w-7xl mx-auto pt-16 relative">
                 <div className="flex justify-between items-center mb-8">
                     <h1 className="text-2xl font-bold">
                         <span className="text-purple-400">GenZ</span> Dashboard
@@ -48,6 +65,7 @@ const Dashboard = () => {
                                     <th className="px-6 py-3 text-left text-xs font-medium text-neutral-300 uppercase tracking-wider">Profile</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-neutral-300 uppercase tracking-wider">Name</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-neutral-300 uppercase tracking-wider">Email</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-neutral-300 uppercase tracking-wider">Username</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-neutral-300 uppercase tracking-wider">Phone</th>
                                     <th className="px-6 py-3 text-right text-xs font-medium text-neutral-300 uppercase tracking-wider">Actions</th>
                                 </tr>
@@ -75,12 +93,15 @@ const Dashboard = () => {
                                             <div className="text-sm text-neutral-300">{user.email}</div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="text-sm text-neutral-300">{user.username}</div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="text-sm text-neutral-300">{user.phone || 'N/A'}</div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <div className="flex justify-end space-x-2">
                                                 <button
-                                                    onClick={() => handleEdit(user._id)}
+                                                    onClick={() => handleEdit(user)}
                                                     className="text-purple-400 hover:text-purple-300 p-1 rounded-full hover:bg-purple-900/30 transition-colors duration-200"
                                                     title="Edit"
                                                 >
@@ -107,41 +128,55 @@ const Dashboard = () => {
                         Page <span className="font-medium">{currentPage}</span> of{' '}
                         <span className="font-medium">{totalPages}</span>
                     </div>
-                    
+
                     <div className="flex space-x-2">
                         <button
                             onClick={() => handlePageChange(currentPage - 1)}
                             disabled={currentPage === 1}
-                            className={`px-3 py-1 rounded-md ${currentPage === 1 
-                                ? 'bg-neutral-700 text-neutral-500 cursor-not-allowed' 
+                            className={`px-3 py-1 rounded-md ${currentPage === 1
+                                ? 'bg-neutral-700 text-neutral-500 cursor-not-allowed'
                                 : 'bg-neutral-700 hover:bg-neutral-600 text-neutral-300'}`}
                         >
                             <ChevronLeft className="h-5 w-5" />
                         </button>
-                        
+
                         {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
                             <button
                                 key={number}
                                 onClick={() => handlePageChange(number)}
-                                className={`px-3 py-1 rounded-md ${currentPage === number 
-                                    ? 'bg-purple-600 text-white' 
+                                className={`px-3 py-1 rounded-md ${currentPage === number
+                                    ? 'bg-purple-600 text-white'
                                     : 'bg-neutral-700 hover:bg-neutral-600 text-neutral-300'}`}
                             >
                                 {number}
                             </button>
                         ))}
-                        
+
                         <button
                             onClick={() => handlePageChange(currentPage + 1)}
                             disabled={currentPage === totalPages}
-                            className={`px-3 py-1 rounded-md ${currentPage === totalPages 
-                                ? 'bg-neutral-700 text-neutral-500 cursor-not-allowed' 
+                            className={`px-3 py-1 rounded-md ${currentPage === totalPages
+                                ? 'bg-neutral-700 text-neutral-500 cursor-not-allowed'
                                 : 'bg-neutral-700 hover:bg-neutral-600 text-neutral-300'}`}
                         >
                             <ChevronRight className="h-5 w-5" />
                         </button>
                     </div>
                 </div>
+
+                <EditUserModal
+                    user={selectedUser}
+                    isOpen={isEditModalOpen}
+                    onClose={() => setIsEditModalOpen(false)}
+                    onSave={handleSaveEdit}
+                />
+
+                <DeleteWarningModal
+                    isOpen={isDeleteModalOpen}
+                    onClose={() => setIsDeleteModalOpen(false)}
+                    onConfirm={handleConfirmDelete}
+                    userName={selectedUser?.name || ''}
+                />
             </div>
         </div>
     );
