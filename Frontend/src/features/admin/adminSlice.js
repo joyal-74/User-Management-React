@@ -83,6 +83,20 @@ export const editUser = createAsyncThunk(
 );
 
 
+export const addUser = createAsyncThunk(
+    'user/adduser',
+    async (userData, { rejectWithValue }) => {
+        try {
+            const response = await axiosInstance.post('/admin/add', userData);
+            return response.data;
+        } catch (err) {
+            const errorData = err.response?.data?.error || err.message || 'Failed to add user';
+            return rejectWithValue(errorData);
+        }
+    }
+);
+
+
 const adminSlice = createSlice({
     name: 'admin',
     initialState: {
@@ -152,6 +166,17 @@ const adminSlice = createSlice({
                 state.users = action.payload?.users || null;
             })
             .addCase(deleteUser.rejected, (state) => {
+                state.loading = false;
+            })
+            // add user
+            .addCase(addUser.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(addUser.fulfilled, (state, action) => {
+                state.loading = false;
+                state.users = action.payload?.users || null;
+            })
+            .addCase(addUser.rejected, (state) => {
                 state.loading = false;
             })
 

@@ -1,10 +1,11 @@
 import { Edit, Trash2, User, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { deleteUser, editUser, fetchAllUsers } from '../../../features/admin/adminSlice';
+import { addUser, deleteUser, editUser, fetchAllUsers } from '../../../features/admin/adminSlice';
 import EditUserModal from '../Modals/EditUserModal';
 import DeleteWarningModal from '../Modals/DeleteWarningModal';
 import {toast} from 'react-toastify'
+import AddUserModal from '../Modals/AddUserModal';
 
 const Dashboard = () => {
     const { users, totalPages } = useSelector((state) => state.admin);
@@ -13,6 +14,7 @@ const Dashboard = () => {
     const limit = 6;
 
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
 
@@ -24,6 +26,16 @@ const Dashboard = () => {
         if (newPage >= 1 && newPage <= totalPages) {
             setCurrentPage(newPage);
         }
+    };
+
+    const handleAdd = (user) => {
+        setIsAddModalOpen(true);
+    };
+
+    const handleAddUser = (updatedData) => {
+        dispatch(addUser(updatedData));
+        toast.success('User added successfully..!')
+        setIsEditModalOpen(false);
     };
 
     const handleEdit = (user) => {
@@ -54,7 +66,7 @@ const Dashboard = () => {
                     <h1 className="text-2xl font-bold">
                         <span className="text-purple-400">GenZ</span> Dashboard
                     </h1>
-                    <button className="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-lg transition-colors duration-200">
+                    <button className="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-lg transition-colors duration-200" onClick={handleAdd}>
                         Add New User
                     </button>
                 </div>
@@ -173,12 +185,21 @@ const Dashboard = () => {
                     onSave={handleSaveEdit}
                 />
 
+                <AddUserModal
+                    user={selectedUser}
+                    isOpen={isAddModalOpen}
+                    onClose={() => setIsAddModalOpen(false)}
+                    onSave={handleAddUser}
+                />
+
                 <DeleteWarningModal
                     isOpen={isDeleteModalOpen}
                     onClose={() => setIsDeleteModalOpen(false)}
                     onConfirm={handleConfirmDelete}
                     userName={selectedUser?.name || ''}
                 />
+
+                
             </div>
         </div>
     );

@@ -1,6 +1,6 @@
 import { MongoUserRepository } from "../repositories/User/MongouserRepository.js";
 import { MongoAdminRepository } from "../repositories/Admin/MongoAdminRepository.js";
-import { loginAdmin, logoutAdminService, findAllUsers, editUserDetails, deleteUser } from "../services/adminServices.js";
+import { loginAdmin, logoutAdminService, findAllUsers, editUserDetails, deleteUser, addUser } from "../services/adminServices.js";
 import { generateToken } from '../utils/token.js';
 
 const userRepo = new MongoUserRepository();
@@ -87,5 +87,14 @@ export const deleteUserHandler = async (req,res) => {
     } catch (error) {
         console.log(error)
         res.status(400).json({ error: error.message });
+    }
+}
+
+export const addNewUserHandler = async (req, res) => {
+    try {
+        const response = await addUser(req.body, userRepo);
+        res.status(201).json(response);
+    } catch (error) {
+        console.log(error);
     }
 }

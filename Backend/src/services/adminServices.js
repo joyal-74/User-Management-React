@@ -61,9 +61,33 @@ export const editUserDetails = async (data, userRepo) => {
 export const deleteUser = async (id, userRepo) => {
     const user = await userRepo.findByIdAndDelete(id);
 
-    if(!user) throw new Error('User not found');
+    if (!user) throw new Error('User not found');
 
     const newUsers = await userRepo.findAll();
 
+    return newUsers;
+}
+
+export const addUser = async (userData, userRepo) => {
+    const { name, email, username, phone, profilePic } = userData;
+
+    const userExists = await userRepo.findByEmail(email);
+    if (userExists) throw new Error('User already exists');
+    const defaultPassword = '123456'
+
+    const hashedPassword = await bcrypt.hash(defaultPassword, 10);
+
+    const user = await userRepo.create({
+        name,
+        email,
+        password: hashedPassword,
+        username,
+        phone,
+        profilePic: profilePic || ''
+    });
+
+    await user.save();
+
+    const newUsers = await userRepo.findAll();
     return newUsers;
 }
