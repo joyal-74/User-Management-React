@@ -1,6 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axiosInstance from '../../api/axiosInstance';
-import { Query } from 'mongoose';
 
 
 export const loginAdmin = createAsyncThunk(

@@ -77,7 +77,7 @@ const Dashboard = () => {
                     </h1>
                     <div className='space-x-3 flex'>
                         <div className='flex relative'>
-                            <input type="text" className='px-4 py-2 rounded-l-md bg-purple-500/30 border border-purple-500 focus:outline-none focus:ring-0' onChange={(e)=> setQuery(e.target.value)} />
+                            <input type="text" className='px-4 py-2 rounded-l-md bg-purple-500/30 border border-purple-500 focus:outline-none focus:ring-0' onChange={(e)=> setQuery((e.target.value).trimStart())} />
                             <button className='bg-purple-500 rounded-r-sm px-2' onClick={handleSearchUsers}>< Search className=' right-2 top-2' /></button>
                         </div>
                         <button className="bg-purple-500 hover:bg-purple-400 text-white px-4 py-2 rounded-sm transition-colors duration-200" onClick={handleAdd}>

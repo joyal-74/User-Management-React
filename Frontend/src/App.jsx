@@ -16,7 +16,7 @@ function App() {
     return (
         <>
             <ToastContainer position="top-right" autoClose={2000} hideProgressBar={false} 
-            closeOnClick pauseOnHover draggable theme="dark" />
+                closeOnClick pauseOnHover draggable theme="dark" />
 
              <Routes>
                 <Route path="/signup" element={<Signup />} />
