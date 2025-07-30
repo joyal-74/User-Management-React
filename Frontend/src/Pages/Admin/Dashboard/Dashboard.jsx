@@ -1,10 +1,10 @@
-import { Edit, Trash2, User, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Edit, Trash2, User, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { addUser, deleteUser, editUser, fetchAllUsers } from '../../../features/admin/adminSlice';
+import { addUser, deleteUser, editUser, fetchAllUsers, searchUser } from '../../../features/admin/adminSlice';
 import EditUserModal from '../Modals/EditUserModal';
 import DeleteWarningModal from '../Modals/DeleteWarningModal';
-import {toast} from 'react-toastify'
+import { toast } from 'react-toastify'
 import AddUserModal from '../Modals/AddUserModal';
 
 const Dashboard = () => {
@@ -17,6 +17,7 @@ const Dashboard = () => {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
+    const [query, setQuery] = useState('');
 
     useEffect(() => {
         dispatch(fetchAllUsers({ page: currentPage, limit }));
@@ -28,14 +29,18 @@ const Dashboard = () => {
         }
     };
 
-    const handleAdd = (user) => {
+    const handleAdd = () => {
         setIsAddModalOpen(true);
     };
 
-    const handleAddUser = (updatedData) => {
-        dispatch(addUser(updatedData));
-        toast.success('User added successfully..!')
-        setIsEditModalOpen(false);
+    const handleAddUser = async (updatedData) => {
+        try {
+            await dispatch(addUser(updatedData)).unwrap();
+            toast.success('User added successfully..!')
+            setIsEditModalOpen(false);
+        } catch (error) {
+            toast.error(error || 'User added successfully..!')
+        }
     };
 
     const handleEdit = (user) => {
@@ -59,6 +64,10 @@ const Dashboard = () => {
         setIsDeleteModalOpen(false);
     };
 
+    const handleSearchUsers = () => {
+        dispatch(searchUser({ query, page: currentPage, limit }));
+    }
+
     return (
         <div className="min-h-screen bg-neutral-900 text-neutral-100 p-6">
             <div className="max-w-7xl mx-auto pt-16">
@@ -66,9 +75,15 @@ const Dashboard = () => {
                     <h1 className="text-2xl font-bold">
                         <span className="text-purple-400">GenZ</span> Dashboard
                     </h1>
-                    <button className="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-lg transition-colors duration-200" onClick={handleAdd}>
-                        Add New User
-                    </button>
+                    <div className='space-x-3 flex'>
+                        <div className='flex relative'>
+                            <input type="text" className='px-4 py-2 rounded-l-md bg-purple-500/30 border border-purple-500 focus:outline-none focus:ring-0' onChange={(e)=> setQuery(e.target.value)} />
+                            <button className='bg-purple-500 rounded-r-sm px-2' onClick={handleSearchUsers}>< Search className=' right-2 top-2' /></button>
+                        </div>
+                        <button className="bg-purple-500 hover:bg-purple-400 text-white px-4 py-2 rounded-sm transition-colors duration-200" onClick={handleAdd}>
+                            + New User
+                        </button>
+                    </div>
                 </div>
 
                 <div className="bg-neutral-800 rounded-xl border border-neutral-700 overflow-hidden shadow-lg mb-6">
@@ -159,7 +174,7 @@ const Dashboard = () => {
                                 key={number}
                                 onClick={() => handlePageChange(number)}
                                 className={`px-3 py-1 rounded-md ${currentPage === number
-                                    ? 'bg-purple-600 text-white'
+                                    ? 'bg-purple-500 text-white'
                                     : 'bg-neutral-700 hover:bg-neutral-600 text-neutral-300'}`}
                             >
                                 {number}
@@ -199,7 +214,7 @@ const Dashboard = () => {
                     userName={selectedUser?.name || ''}
                 />
 
-                
+
             </div>
         </div>
     );

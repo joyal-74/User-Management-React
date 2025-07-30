@@ -36,7 +36,8 @@ export const getAdminProfile = async (adminId) => {
 };
 
 export const findAllUsers = async (page, limit, userRepo) => {
-    const data = await userRepo.findAll(page, limit);
+    let query = ''
+    const data = await userRepo.findAll(query, page, limit);
     return data;
 };
 
@@ -68,11 +69,19 @@ export const deleteUser = async (id, userRepo) => {
     return newUsers;
 }
 
+
+export const searchUser = async (query, page, limit, userRepo) => {
+    const data = await userRepo.findAll(query, page, limit);
+    return data;
+}
+
+
 export const addUser = async (userData, userRepo) => {
     const { name, email, username, phone, profilePic } = userData;
 
     const userExists = await userRepo.findByEmail(email);
     if (userExists) throw new Error('User already exists');
+
     const defaultPassword = '123456'
 
     const hashedPassword = await bcrypt.hash(defaultPassword, 10);

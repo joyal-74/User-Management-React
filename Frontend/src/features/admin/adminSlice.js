@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axiosInstance from '../../api/axiosInstance';
+import { Query } from 'mongoose';
 
 
 export const loginAdmin = createAsyncThunk(
@@ -63,6 +64,21 @@ export const deleteUser = createAsyncThunk(
             return response.data;
         } catch (err) {
             const errorData = err.response?.data?.error || err.message || 'Failed to delete profile';
+            return rejectWithValue(errorData);
+        }
+    }
+);
+
+
+export const searchUser = createAsyncThunk(
+    'user/searchuser',
+    async ({ query='', page = 1, limit = 6 } = {}, { rejectWithValue }) => {
+        try {
+            const response = await axiosInstance.get(`/admin/search?query=${query}&page=${page}&limit=${limit}`);
+
+            return response.data;
+        } catch (err) {
+            const errorData = err.response?.data?.error || err.message || 'Failed to fetch users';
             return rejectWithValue(errorData);
         }
     }
@@ -144,6 +160,18 @@ const adminSlice = createSlice({
                 state.totalPages = action.payload.pages;
             })
             .addCase(fetchAllUsers.rejected, (state) => {
+                state.loading = false;
+            })
+            // search users
+            .addCase(searchUser.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(searchUser.fulfilled, (state, action) => {
+                state.loading = false;
+                state.users = action.payload?.users || null;
+                state.totalPages = action.payload.pages;
+            })
+            .addCase(searchUser.rejected, (state) => {
                 state.loading = false;
             })
             //edit user

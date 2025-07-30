@@ -61,7 +61,9 @@ const AddUserModal = ({ isOpen, onClose, onSave }) => {
             newErrors.username = 'please include letters';
         }
 
-        if (formData.phone && !/^\d{10}$/.test(formData.phone)) {
+        if (!formData.phone.trim()) {
+            newErrors.phone = 'Phone Number required';
+        } else if (formData.phone && !/^\d{10}$/.test(formData.phone)) {
             newErrors.phone = 'Enter 10 digits';
         }
 
@@ -181,7 +183,6 @@ const AddUserModal = ({ isOpen, onClose, onSave }) => {
                                     value={formData.name}
                                     onChange={handleChange}
                                     className={`w-full bg-neutral-700 border ${errors.name ? 'border-red-500' : 'border-neutral-600'} rounded-md px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-purple-500`}
-                                    required
                                 />
                                 {errors.name && (
                                     <p className="text-xs text-red-400 mt-1">{errors.name}</p>
@@ -196,7 +197,6 @@ const AddUserModal = ({ isOpen, onClose, onSave }) => {
                                     value={formData.email}
                                     onChange={handleChange}
                                     className={`w-full bg-neutral-700 border ${errors.email ? 'border-red-500' : 'border-neutral-600'} rounded-md px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-purple-500`}
-                                    required
                                 />
                                 {errors.email && (
                                     <p className="text-xs text-red-400 mt-1">{errors.email}</p>
@@ -211,7 +211,7 @@ const AddUserModal = ({ isOpen, onClose, onSave }) => {
                                     value={formData.username}
                                     onChange={handleChange}
                                     className={`w-full bg-neutral-700 border ${errors.username ? 'border-red-500' : 'border-neutral-600'} rounded-md px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-purple-500`}
-                                    required
+                                    
                                 />
                                 {errors.username && (
                                     <p className="text-xs text-red-400 mt-1">{errors.username}</p>
