@@ -20,6 +20,7 @@ export const fetchCurrentAdmin = createAsyncThunk(
     async (_, { rejectWithValue }) => {
         try {
             const response = await axiosInstance.get('/admin/me');
+            console.log(response)
             return response.data;
         } catch (error) {
             console.log(error.message)
@@ -156,7 +157,7 @@ const adminSlice = createSlice({
             .addCase(fetchAllUsers.fulfilled, (state, action) => {
                 state.loading = false;
                 state.users = action.payload?.users || null;
-                state.totalPages = action.payload.pages;
+                state.totalPages = action.payload?.pages;
             })
             .addCase(fetchAllUsers.rejected, (state) => {
                 state.loading = false;

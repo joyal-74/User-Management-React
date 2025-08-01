@@ -18,7 +18,7 @@ export const loginUser = createAsyncThunk(
     async (userData, { rejectWithValue }) => {
         try {
             const response = await axiosInstance.post('/users/login', userData);
-
+            // console.log(response)
             return response.data;
         } catch (err) {
             return rejectWithValue(err.response.data.error || 'Something went wrong');
@@ -31,10 +31,11 @@ export const fetchCurrentUser = createAsyncThunk(
     async (_, { rejectWithValue }) => {
         try {
             const response = await axiosInstance.get('/users/me');
+            // console.log(response)
             return response.data;
         } catch (error) {
             if (error.response?.status === 401) {
-                return null;
+                return rejectWithValue('Unauthorized');
             }
             return rejectWithValue(error.response?.data?.error || 'Failed to fetch user');
         }
@@ -46,6 +47,7 @@ export const logoutUser = createAsyncThunk(
     async (_, { rejectWithValue }) => {
         try {
             const response = await axiosInstance.get('/users/logout');
+            // console.log(response)
             return response.data.user;
         } catch (error) {
             console.log(error)
@@ -58,7 +60,7 @@ export const updateUserProfile = createAsyncThunk(
     'user/updateProfile',
     async (updatedData, { rejectWithValue }) => {
         try {
-            console.log(updatedData)
+            // console.log(updatedData)
             const response = await axiosInstance.put('/users/me', updatedData);
             if (!response) {
                 throw new Error('No response received from server');
@@ -77,6 +79,7 @@ const userSlice = createSlice({
     initialState: {
         user: null,
         loading: false,
+        isLoggedIn: false,
     },
     reducers: {
         logout: (state) => {
@@ -102,7 +105,8 @@ const userSlice = createSlice({
             })
             .addCase(loginUser.fulfilled, (state, action) => {
                 state.loading = false;
-                state.user = action.payload.user;
+                state.user = action.payload.user || null;
+                state.isLoggedIn = true;
             })
             .addCase(loginUser.rejected, (state, action) => {
                 state.loading = false;
@@ -114,9 +118,11 @@ const userSlice = createSlice({
             .addCase(fetchCurrentUser.fulfilled, (state, action) => {
                 state.loading = false;
                 state.user = action.payload?.user || null;
+                state.isLoggedIn = true;
             })
             .addCase(fetchCurrentUser.rejected, (state) => {
                 state.loading = false;
+                state.isLoggedIn = false;
             })
             // update profile
             .addCase(updateUserProfile.pending, (state) => {

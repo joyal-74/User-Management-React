@@ -10,6 +10,8 @@ import Home from "./Pages/Home/Home";
 import AdminLayout from "./Pages/Layout/AdminLayout";
 import UserLayout from "./Pages/Layout/UserLayout";
 import Dashboard from "./Pages/Admin/Dashboard/Dashboard";
+import PublicRoute from "./routes/PublicRoute";
+import PublicRouteAdmin from "./routes/publicRouteAdmin";
 
 
 function App() {
@@ -19,9 +21,21 @@ function App() {
                 closeOnClick pauseOnHover draggable theme="dark" />
 
              <Routes>
-                <Route path="/signup" element={<Signup />} />
-                <Route path="/login" element={<LoginUser />} />
-                <Route path="/admin/login" element={<LoginAdmin />} />
+                <Route path="/signup" element={
+                    <PublicRoute>
+                        <Signup />
+                    </PublicRoute>
+                    } />
+                <Route path="/login" element={
+                    <PublicRoute>
+                        <LoginUser />
+                    </PublicRoute>
+                    } />
+                <Route path="/admin/login" element={
+                    <PublicRouteAdmin>
+                        <LoginAdmin />
+                    </PublicRouteAdmin>
+                    } />
 
                 <Route path="/" element={<UserLayout />}>
                     <Route index element={<Home />} />

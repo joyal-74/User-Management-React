@@ -7,6 +7,7 @@ import user_icon from '../../assets/avatar.png'
 const Navbar = () => {
     const [showDropdown, setShowDropdown] = useState(false);
     const user = useSelector((state) => state.user.user);
+    // console.log(user)
     const navigate = useNavigate();
 
     return (
@@ -19,7 +20,7 @@ const Navbar = () => {
                 <i className="fa-regular fa-bell text-white text-xl"></i>
                 {user ? (
                     <div onClick={() => setShowDropdown(!showDropdown)} className='relative cursor-pointer'>
-                        <img src={user.profilePic || user_icon} alt="" className='h-8 w-8' />
+                        <img src={user.profilePic || user_icon} alt="" className='h-8 w-8 rounded-full' />
                         {showDropdown && <ProfileDropdown />}
                     </div>
                 ) : (

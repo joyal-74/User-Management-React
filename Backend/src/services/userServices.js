@@ -13,7 +13,7 @@ export const registerUser = async (userData, userRepo) => {
         name,
         email,
         password: hashedPassword,
-        username : '',
+        username: '',
         phone: phone || 'N/A',
         profilePic: profilePic || ''
     });
@@ -23,8 +23,7 @@ export const registerUser = async (userData, userRepo) => {
         user: {
             id: user._id,
             name: user.name,
-            email: user.email,
-            profilePic : user.profilePic
+            email: user.email
         }
     };
 };
@@ -45,6 +44,9 @@ export const loginUser = async (userData, userRepo) => {
             id: user._id,
             name: user.name,
             email: user.email,
+            phone: user?.phone || '',
+            username: user?.username || '',
+            profilePic: user?.profilePic || ''
         }
     };
 };
@@ -60,14 +62,47 @@ export const getUserProfile = async (userId, userRepo) => {
     if (!user) throw new Error('User not found');
 
     return {
-        id: user._id,
-        name: user.name,
-        email: user.email,
+        id: user?._id,
+        name: user?.name,
+        email: user?.email,
+        phone: user?.phone,
+        username: user?.username,
+        profilePic: user?.profilePic
     };
 };
 
-export const updateCurrentUser = async (id, data, userRepo) => {
-    const user = await userRepo.findById(id);
+
+export const getCurrentUser = async (user, userRepo) => {
+    try {
+        if (!user || !user.id) {
+            throw new Error('User not authenticated');
+        }
+
+        const currentUser = await userRepo.findById(user.id);
+
+        if (!currentUser) {
+            throw new Error('User not found');
+        }
+
+        return {
+            message: 'Fetched current user',
+            user: {
+                id: currentUser._id,
+                name: currentUser.name,
+                email: currentUser.email,
+                phone: currentUser?.phone || '',
+                username: currentUser?.username || '',
+                profilePic: currentUser?.profilePic || ''
+            }
+        };
+    } catch (err) {
+        console.log(err)
+        return res.status(500).json({ error: 'Server error' });
+    }
+}
+
+export const updateCurrentUser = async (data, userRepo) => {
+    const user = await userRepo.findByEmail(data.email);
 
     if (!user) throw new Error('User not found');
 

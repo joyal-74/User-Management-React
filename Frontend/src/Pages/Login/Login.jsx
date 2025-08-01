@@ -50,7 +50,7 @@ const Login = () => {
         setErrors({});
 
         const action = await dispatch(loginUser(formData));
-        console.log(action)
+
         if (loginUser.fulfilled.match(action)) {
             toast.success('User Logged In successfully!');
             navigate('/')

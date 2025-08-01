@@ -1,7 +1,7 @@
 import { MongoUserRepository } from "../repositories/User/MongouserRepository.js";
 import { MongoAdminRepository } from "../repositories/Admin/MongoAdminRepository.js";
 import { loginAdmin, logoutAdminService, findAllUsers, editUserDetails, deleteUser, addUser, searchUser } from "../services/adminServices.js";
-import { generateToken } from '../utils/token.js';
+import { generateAccessToken, generateRefreshToken } from '../utils/token.js';
 
 const userRepo = new MongoUserRepository();
 const adminRepo = new MongoAdminRepository();
@@ -10,16 +10,24 @@ export const loginAdminHandler = async (req, res) => {
     try {
         const response = await loginAdmin(req.body, adminRepo);
 
-        const token = generateToken(response.admin.id);
+        const accessToken = generateAccessToken(response.admin.id);
+        const refreshToken = generateRefreshToken(response.admin.id);
 
-        res.cookie('jwt', token, {
+        res.cookie('accessToken', accessToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'Lax',
-            maxAge: 7 * 24 * 60 * 60 * 1000
+            maxAge: 15 * 60 * 1000,
         });
 
-        res.status(200).json({ ...response, token });
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'Lax',
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+
+        res.status(200).json(response);
     } catch (error) {
         res.status(401).json({ error: error.message });
     }
@@ -29,9 +37,15 @@ export const logoutAdminHandler = async (req, res) => {
     try {
         await logoutAdminService();
 
-        res.clearCookie('jwt', {
+        res.clearCookie('accessToken', {
             httpOnly: true,
-            sameSite: 'Strict',
+            sameSite: 'Lax',
+            secure: process.env.NODE_ENV === 'production'
+        });
+
+        res.clearCookie('refreshToken', {
+            httpOnly: true,
+            sameSite: 'Lax',
             secure: process.env.NODE_ENV === 'production'
         });
 

@@ -23,7 +23,8 @@ const UserProfile = () => {
                 email: currentUser.email || '',
                 phone: currentUser.phone || '',
                 username: currentUser.username || '',
-                bio: currentUser.bio || ''
+                bio: currentUser.bio || '',
+                profilePic : currentUser.profilePic
             });
             setPreviewImage(currentUser.profilePic || user_icon);
         }
@@ -50,6 +51,7 @@ const UserProfile = () => {
 
         try {
             const url = await uploadImage(file);
+            console.log(url)
             setFormData(prev => ({ ...prev, profilePic: url }));
         } catch (err) {
             toast.error('Upload failed');
@@ -75,9 +77,7 @@ const UserProfile = () => {
             }
         }
 
-        if(currentUser.username){
-            newErrors.username = 'username is required';
-        } else if (formData.username && formData.username.trim() === '') {
+        if (!formData.username && formData.username.trim() === '') {
             newErrors.username = 'Username cannot be just spaces';
         }
 

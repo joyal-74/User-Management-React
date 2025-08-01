@@ -1,33 +1,23 @@
 import jwt from 'jsonwebtoken';
-import Admin from '../models/adminSchema.js';
+import { MongoAdminRepository } from '../repositories/Admin/MongoAdminRepository.js';
+
+const adminRepo = new MongoAdminRepository();
 
 export const protect = async (req, res, next) => {
+    const token = req.cookies.accessToken;
+
+    if (!token) return res.status(401).json({ message: 'No token' });
+
     try {
-        const token = req.cookies.jwt;
-
-        if (!token) {
-            return res.status(401).json({ message: 'No token provided' });
-        }
-
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-        const admin = await Admin.findById(decoded.id).select('-password');
-
-        if (!admin) {
-            return res.status(401).json({ message: 'Admin not found' });
-        }
+        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+        const admin = await adminRepo.findById(decoded.id);
 
         req.admin = admin;
+
+        if (!admin) return res.status(401).json({ message: 'Admin not found' });
+
         next();
     } catch (err) {
-        res.status(401).json({ message: 'Unauthorized, invalid token' });
+        return res.status(401).json({ message: 'Invalid or expired token' });
     }
 };
-
-export const adminLogged = (req, res, next)=> {
-    if(!req.admin){
-        res.status(403).json({ message: 'Admin access denied' });
-    }else{
-        next();
-    }
-}
