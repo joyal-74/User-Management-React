@@ -51,7 +51,7 @@ const UserProfile = () => {
 
         try {
             const url = await uploadImage(file);
-            console.log(url)
+            // console.log(url)
             setFormData(prev => ({ ...prev, profilePic: url }));
         } catch (err) {
             toast.error('Upload failed');

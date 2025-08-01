@@ -83,7 +83,6 @@ export const getCurrentAdmin = (req, res) => {
 export const editUserDetailshandler = async (req, res) => {
     try {
         const response = await editUserDetails(req.body, userRepo);
-
         res.status(201).json(response);
     } catch (error) {
         // console.log(error.message)

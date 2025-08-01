@@ -89,7 +89,9 @@ export const editUser = createAsyncThunk(
     'user/edituser',
     async ({ userId, updatedData }, { rejectWithValue }) => {
         try {
+            console.log(updatedData)
             const response = await axiosInstance.put('/admin/edit', updatedData);
+            console.log(response)
             return response.data;
         } catch (err) {
             const errorData = err.response?.data?.error || err.message || 'Failed to update profile';

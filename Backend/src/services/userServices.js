@@ -103,6 +103,7 @@ export const getCurrentUser = async (user, userRepo) => {
 
 export const updateCurrentUser = async (data, userRepo) => {
     const user = await userRepo.findByEmail(data.email);
+    console.log(user)
 
     if (!user) throw new Error('User not found');
 

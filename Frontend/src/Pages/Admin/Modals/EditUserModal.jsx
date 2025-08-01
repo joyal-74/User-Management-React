@@ -1,5 +1,7 @@
 import { X, User, Upload } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useImageUpload } from '../../../Hooks/useImageUpload';
+import { toast } from 'react-toastify';
 
 const EditUserModal = ({ user, isOpen, onClose, onSave }) => {
     const [formData, setFormData] = useState({
@@ -10,8 +12,9 @@ const EditUserModal = ({ user, isOpen, onClose, onSave }) => {
     });
 
     const [previewImage, setPreviewImage] = useState('');
-    const [selectedFile, setSelectedFile] = useState(null);
     const [errors, setErrors] = useState({});
+    const [uploading, setUploading] = useState(false);
+
 
 
     useEffect(() => {
@@ -21,9 +24,9 @@ const EditUserModal = ({ user, isOpen, onClose, onSave }) => {
                 email: user.email || '',
                 username: user.username || '',
                 phone: user.phone || '',
+                profilePic: user.profilePic || '',
             });
             setPreviewImage(user.profilePic || '');
-            setSelectedFile(null);
             setErrors({});
         }
     }, [user, isOpen]);
@@ -44,7 +47,9 @@ const EditUserModal = ({ user, isOpen, onClose, onSave }) => {
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleImageChange = (e) => {
+    const { uploadImage } = useImageUpload();
+
+    const handleImageChange = async (e) => {
         const file = e.target.files?.[0];
         if (file) {
             if (!['image/jpeg', 'image/png'].includes(file.type)) {
@@ -62,9 +67,22 @@ const EditUserModal = ({ user, isOpen, onClose, onSave }) => {
             };
             reader.readAsDataURL(file);
 
+            try {
+                setUploading(true);
+                const url = await uploadImage(file);
+                // console.log(url)
+                setFormData(prev => ({ ...prev, profilePic: url }));
+            } catch (err) {
+                toast.error('Upload failed');
+            } finally {
+                setUploading(false); // end
+            }
+
             setErrors(prev => ({ ...prev, profilePic: undefined }));
         }
     };
+
+
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -80,14 +98,13 @@ const EditUserModal = ({ user, isOpen, onClose, onSave }) => {
 
         if (!validateForm()) return;
 
+
         const formDataToSend = new FormData();
         formDataToSend.append('name', formData.name);
         formDataToSend.append('email', formData.email);
         formDataToSend.append('username', formData.username);
         formDataToSend.append('phone', formData.phone);
-        if (selectedFile) {
-            formDataToSend.append('profilePic', selectedFile);
-        }
+        formDataToSend.append('profilePic', formData.profilePic);
 
         onSave(user._id, formDataToSend);
         onClose();
@@ -214,10 +231,12 @@ const EditUserModal = ({ user, isOpen, onClose, onSave }) => {
                             </button>
                             <button
                                 type="submit"
-                                className="px-4 py-2 rounded-md bg-purple-600 text-white hover:bg-purple-500 transition-colors"
+                                disabled={uploading}
+                                className={`px-4 py-2 rounded-md ${uploading ? 'bg-purple-400 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-500'} text-white transition-colors`}
                             >
-                                Save Changes
+                                {uploading ? 'Uploading...' : 'Save Changes'}
                             </button>
+
                         </div>
                     </form>
                 </div>
